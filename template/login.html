@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<div id="container" style="font-family:'Trebuchet MS', Helvetica, sans-serif">
+   <div id="header" style="background-color:#f4f4f4;color:#ff0000;padding:10px">
+   <b>take&hearts;</b>
+        
+   </div>
+
+<div id="menu" style="background-color:#f4f4f4;width:100px;float:left;padding:10px 10px">
+</div>
+
+<div id="content" style="background-color:#ffffff;float:left;padding:10px 10px">
+
+    <small>>>Login</small><br><br>
+    {{ message }}
+    
+    <form name="login" action="/login" method="post">
+        {% if user_name %}
+           Username: {{ user_name }}<input type="hidden" name="user_name", value="{{ user_name }}"><br>
+        {% else %}
+           Username:  <input type="text" name="user_name"><br>
+        {% endif %}
+        Password:  <input type="password" name=password_text"><br>
+        {% if resetpassword %}
+            Confirm Password:  <input type="password" name=confirm_password_text"><br>
+            <input type="submit" value="Reset Password"><br>
+        {% else %}
+            <input type="submit" value="Log In"><br>
+        {% endif %}
+        
+    </form>
+    
+</div>
+
+<div id="footer" style="background-color:#f4f4f4;color:#c1c1c1;clear:both;text-align:center;">
+&copy; 2014 simplyright | About Us | Terms of Service | Privacy Policy | Contact us | Send Feedback</div>
+
+</div>
+ 
+</body>
+</html>
+

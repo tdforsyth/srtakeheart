@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+<body>
+
+<div id="container" style="font-family:'Trebuchet MS', Helvetica, sans-serif">
+   <div id="header" style="background-color:#f4f4f4;color:#ff0000;padding:10px">
+   <b>take&hearts;</b>
+        
+   </div>
+
+<div id="menu" style="background-color:#f4f4f4;width:100px;float:left;padding:10px 10px">
+<b>Menu</b><br>
+&nbsp;Menu Item 1<br>
+&nbsp;Menu Item 2<br>
+&nbsp;Menu Item 3</div>
+
+<div id="content" style="background-color:#ffffff;float:left;padding:10px 10px">
+
+    <form name="patientform" action="/patientdetail" method="post" enctype="multipart/form-data">
+
+        <small>>>Patient Details</small><br><br>
+        Enter or edit patient data here:<br><br>
+        <table>
+           <tr>
+      	   <td>First name: </td>
+              <td><input type="text" name="firstname"
+        {% if patient %}
+            value="{{ patient.first_name }}"
+        {% endif %}
+      	    ></td>
+        {% if errfirstnametext %}
+            <td><font color="red"> {{ errfirstnametext }}
+            </font></td>
+        {% endif %}
+           </tr>
+        
+           <tr>
+              <td>Last name: </td>
+              <td><input type="text" name="lastname"
+        {% if patient %}
+              value="{{ patient.last_name }}"
+        {% endif %}
+              ></td>
+           </tr>
+          
+           <tr>
+              <td>Address: </td>
+              <td><input type="text" name="address"
+        {% if patient %}
+              value="{{ patient.address }}"
+        {% endif %}
+              ></td>
+           </tr>
+
+           <tr>
+              <td>Phone Number: </td>
+              <td><input type="text" name="phone"
+        {% if patient %}
+              value="{{ patient.phone_number }}"
+        {% endif %}
+              ></td>
+           </tr>
+        </table>  
+
+        {% if oid %}
+            <br>
+            <input type="hidden" name="oid" value="{{ oid }}">
+            <input type="hidden" name="pid" value="{{ pid }}">
+            <input type="submit" value="Update User">
+        {% else %}
+            <br>
+            <input type="submit" value="Create User">
+        {% endif %}
+    
+    </form>
+
+    {% if files %}
+       <br>Files uploaded for this patient:<br><br>
+       <table>
+    {% endif %}
+    
+    {% for current_file in files %}
+          <tr>
+             <td>{{ current_file.file_name }}</td><td></td>
+             <td><a href="/filedownloadhandler/{{ current_file.file_blob_key }}">Download</a></td>
+             <td><a href="/filedetails?file_name={{ current_file.file_name }}&blob_key={{ current_file.file_blob_key }}">See Contents</a></td>
+          </tr>
+    {% endfor %}
+    
+    {% if files %}
+       </table>
+    {% endif %}
+
+
+       <br><a href="/fileupload?oid={{ oid }}&pid={{ pid }}">Click to upload new file for this patient</a>
+    
+    
+    
+</div>
+
+<div id="footer" style="background-color:#f4f4f4;color:#c1c1c1;clear:both;text-align:center;">
+&copy; 2014 simplyright | About Us | Terms of Service | Privacy Policy | Contact us | Send Feedback</div>
+
+</div>
+ 
+</body>
+</html>
+{% endautoescape %}
