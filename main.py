@@ -1,3 +1,5 @@
+import fix_path
+
 import cgi
 import cgitb
 import os
@@ -15,14 +17,14 @@ from webapp2_extras import sessions
 import libs.py_bcrypt.bcrypt as bcrypt
 
 # Here we are importing the classes we have defined
-from module.patientsearchresult import Patientsearch
-from module.patientdetail import Patientdetail
-from module.fileupload import Fileupload
-from module.fileupload import Fileuploadhandler
-from module.fileupload import Filedownloadhandler
-from module.filedetail import Filereader
-from module.login import Login
-from module.basehandler import BaseHandler
+from patientsearchresult import Patientsearch
+from patientdetail import Patientdetail
+from fileupload import Fileupload
+from fileupload import Fileuploadhandler
+from fileupload import Filedownloadhandler
+from filedetail import Filereader
+from login import Login
+from basehandler import BaseHandler
 
 # Set up our Config Dictionary
 config = {}

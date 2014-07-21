@@ -1,3 +1,5 @@
+import fix_path
+
 import jinja2
 import webapp2
 import os
@@ -5,6 +7,8 @@ import sys
 import MySQLdb
 
 from webapp2_extras import sessions
+
+from wtforms import Form, BooleanField, TextField, validators
 
 from module.basehandler import BaseHandler
 
