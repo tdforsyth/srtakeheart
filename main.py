@@ -17,7 +17,6 @@ from webapp2_extras import sessions
 import libs.py_bcrypt.bcrypt as bcrypt
 
 # Here we are importing the classes we have defined
-from patientsearchresult import Patientsearch
 from patientdetail import Patientdetail
 from fileupload import Fileupload
 from fileupload import Fileuploadhandler
@@ -32,7 +31,13 @@ config = {}
 # Set the Secret Key for Webapp2 Sessions
 my_secret_key_text = 'simplyright takeheart secret session key'
 my_secret_key = hashlib.sha1(my_secret_key_text).hexdigest()
-config['webapp2_extras.sessions'] = {'secret_key': my_secret_key}
+config['webapp2_extras.sessions'] = {
+    'secret_key': my_secret_key,
+    'backends': {'datastore': 'webapp2_extras.appengine.sessions_ndb.DatastoreSessionFactory',
+                 'memcache': 'webapp2_extras.appengine.sessions_memcache.MemcacheSessionFactory',
+                 'securecookie': 'webapp2_extras.sessions.SecureCookieSessionFactory'}
+    }
+    
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.join(os.getcwd(),'template')),
@@ -52,7 +57,8 @@ class Overview(BaseHandler):
             self.redirect('/login')
         
         template_values = {
-            'user': user
+            'user': user,
+            'session': self.session
             }
 
         template = JINJA_ENVIRONMENT.get_template('overview.html')
@@ -68,6 +74,11 @@ class Overview(BaseHandler):
         user = self.session.get('user')
         if not user:
             self.redirect('/login')
+
+        template_values = {
+            'user': user,
+            'session': self.session
+            }
 
         # Connect to the MySQL Database.  If this is production, to production
         # otherwise to the Dev DB
@@ -102,14 +113,13 @@ class Overview(BaseHandler):
         db.close()
     
         # Prepare values to call the template
-        template_values = {'patients': patients}
+        template_values['patients'] = patients
 
         template = JINJA_ENVIRONMENT.get_template('patientsearchresult.html')
         self.response.write(template.render(template_values))
             
 app = webapp2.WSGIApplication([
     ('/', Overview),
-    ('/patientsearch', Patientsearch),
     ('/patientdetail', Patientdetail),
     ('/fileupload', Fileupload),
     ('/fileuploadhandler',Fileuploadhandler),

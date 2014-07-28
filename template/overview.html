@@ -3,38 +3,32 @@
 <body>
 
 <div id="container" style="font-family:'Trebuchet MS', Helvetica, sans-serif">
-   <div id="header" style="background-color:#f4f4f4;color:#ff0000;padding:10px">
-   <b>take&hearts;</b>
-        
-   </div>
 
-<div id="menu" style="background-color:#f4f4f4;width:100px;float:left;padding:10px 10px">
-<b>Menu</b><br>
-&nbsp;Menu Item 1<br>
-&nbsp;Menu Item 2<br>
-&nbsp;Menu Item 3</div>
+    {% include "header.html" %}
 
-<div id="content" style="background-color:#ffffff;float:left;padding:10px 10px">
+    {% include "menu.html" %}
 
-    <small>>>Overview</small><br><br>
-    Enter patient full or partial first or last name<br>
-    to search for existing patient<br>
+    <div id="content" style="background-color:#ffffff;float:left;padding:10px 10px">
+
+        <small>>>Overview</small><br><br>
+        Enter patient full or partial first or last name<br>
+        to search for existing patient<br>
     
-    <form name="search" action="/" method="post">
-        <input type="text" name="searchtext"><br>
-        <input type="submit" value="Search for Existing Patient"><br>
-    </form>
+        <form name="search" action="/" method="post">
+            <input type="text" name="searchtext"><br>
+            <input type="submit" value="Search for Existing Patient"><br>
+        </form>
 
-    <br>
-    Create a new patient record<br>
-    <form name="create" action="/patientdetail" method="get">
-        <input type="submit" value="Create New Patient"><br>
-    </form>
+        <br>
+        Create a new patient record<br>
+        <form name="create" action="/patientdetail" method="get">
+            <input type="submit" value="Create New Patient"><br>
+        </form>
     
-</div>
+    </div>
 
-<div id="footer" style="background-color:#f4f4f4;color:#c1c1c1;clear:both;text-align:center;">
-&copy; 2014 simplyright | About Us | Terms of Service | Privacy Policy | Contact us | Send Feedback</div>
+    {% include "footer.html" %}
+
 
 </div>
  

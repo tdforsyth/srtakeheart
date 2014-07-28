@@ -1,8 +1,14 @@
-import jinja2
-import webapp2
+import fix_path
+
 import os
 import sys
+import jinja2
+import webapp2
 import MySQLdb
+
+from webapp2_extras import sessions
+
+from basehandler import BaseHandler
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.join(os.getcwd(),'template')),
@@ -10,11 +16,21 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     autoescape=True)
 
 # Handles the form that allows entry and update of user details
-class Patientdetail(webapp2.RequestHandler):
+class Patientdetail(BaseHandler):
 
     # This is the "Get" handler.  It is invoked when creating a new user,
     # or when loading an existing user record
     def get(self):
+
+        # We check the session to see if the user is logged in
+        user = self.session.get('user')
+        if not user:
+            self.redirect('/login')
+        
+        template_values = {
+            'user': user,
+            'session': self.session
+            }
 
         # Try to get the Owner and Patient IDs from the Query String
         ownerid = self.request.get("oid")
@@ -26,7 +42,6 @@ class Patientdetail(webapp2.RequestHandler):
 
                patient = Loadpatientrecord(ownerid,patientid)
 
-               template_values = {}
                template_values['oid'] = ownerid
                template_values['pid'] = patientid
                template_values['patient'] = patient
@@ -38,12 +53,7 @@ class Patientdetail(webapp2.RequestHandler):
 
                template_values['files'] = files                   
 
-        # If there Isn't a Patient ID, then print up the basic verson
-        # of the template with no values filled in
-        else:
-            
-               template_values = {}
-                    
+        # Render the Template (blank if we didn't find values above)                          
         template = JINJA_ENVIRONMENT.get_template('patientdetail.html')
         self.response.write(template.render(template_values))
 
@@ -52,6 +62,16 @@ class Patientdetail(webapp2.RequestHandler):
     # the data is good.  If not, we'll reload the same form with some errors
     # to be fixed.  If it is good, we'll save the changes
     def post(self):
+
+        # We check the session to see if the user is logged in
+        user = self.session.get('user')
+        if not user:
+            self.redirect('/login')
+        
+        template_values = {
+            'user': user,
+            'session': self.session
+            }
 
         #Check values submitted
 
@@ -70,12 +90,12 @@ class Patientdetail(webapp2.RequestHandler):
         #Something failed validation.  Reload the form with error messages
         if (errvalidation):
             
-            template_values = {
+            template_values.update({
                 'firstname': self.request.get('firstname'),
                 'lastname': self.request.get('lastname'),
                 'address': self.request.get('address'),
                 'phone': self.request.get('phone')
-            }
+            })
 
             patientid = self.request.get('pid')
             ownerid = self.request.get('oid')

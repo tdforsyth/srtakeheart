@@ -1,23 +1,34 @@
-#import cgi
-#import cgitb
-#import os
-#import urllib
+import fix_path
+
+import os
+import sys
 import re
 import jinja2
 import webapp2
-import os
-import sys
 
 from google.appengine.ext import blobstore
+from webapp2_extras import sessions
+
+from basehandler import BaseHandler
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.join(os.getcwd(),'template')),
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
 
-class Filereader(webapp2.RequestHandler):
+class Filereader(BaseHandler):
 
     def get(self):
+
+        # We check the session to see if the user is logged in
+        user = self.session.get('user')
+        if not user:
+            self.redirect('/login')
+        
+        template_values = {
+            'user': user,
+            'session': self.session
+            }
 
         # Get the Blobkey for the File to be displayed from the request
         blob_key = self.request.get('blob_key')
@@ -64,7 +75,6 @@ class Filereader(webapp2.RequestHandler):
                 filecontents[int(m.group('lineindex'))] = {'linelabel': m.group('linelabel'), 'linevalue': line_value}
 
         # OK, Done reading the file.  Get ready to show the output with a template
-        template_values = {}
         template_values['file_name'] = file_name
         template_values['filecontents'] = filecontents
 

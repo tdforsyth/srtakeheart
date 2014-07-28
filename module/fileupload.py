@@ -20,6 +20,16 @@ class Fileupload(webapp2.RequestHandler):
     # This is the GET handler - It loads the File Upload Form
     # and makes sure the submitted file is uploaded to the blobstore
     def get(self):
+
+        # We check the session to see if the user is logged in
+        user = self.session.get('user')
+        if not user:
+            self.redirect('/login')
+        
+        template_values = {
+            'user': user,
+            'session': self.session
+            }
        
         # Read the Patient and Owner IDs from the URL String
         patientid = self.request.get('pid')
@@ -29,11 +39,11 @@ class Fileupload(webapp2.RequestHandler):
         upload_url = blobstore.create_upload_url('/fileuploadhandler')
 
         #Load all the values that the webpage will need
-        template_values = {
+        template_values.update({
             'upload_url': upload_url,
             'oid': ownerid,
             'pid': patientid
-        }
+        })
 
         #Serve the webpage
         template = JINJA_ENVIRONMENT.get_template('fileupload.html')
@@ -43,6 +53,11 @@ class Fileuploadhandler(blobstore_handlers.BlobstoreUploadHandler):
     # This is the POST handler - It handles the file once it has been
     # uploaded 
     def post(self):
+
+        # We check the session to see if the user is logged in
+        user = self.session.get('user')
+        if not user:
+            self.redirect('/login')
 
         # Read the Patient and Owner IDs from the prior form
         patientid = self.request.get('pid')
