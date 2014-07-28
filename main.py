@@ -58,17 +58,16 @@ class Overview(BaseHandler):
         template = JINJA_ENVIRONMENT.get_template('overview.html')
         self.response.out.write(template.render(template_values))
 
-        # Placeholder - Need to put a check here to see if the user is logged in
-        # If not, send to Login Page
-
-        template = JINJA_ENVIRONMENT.get_template('overview.html')
-        self.response.write(template.render(template_values))
-
     def post(self):
     # This is the "Post" method - If the user searches for an
     # existing patient, it either gets the patient and transfers
     # control to the Search Results pages, 
     # or returns to the Overview page with a "No Patient Found" message
+
+        # We check the session to see if the user is logged in
+        user = self.session.get('user')
+        if not user:
+            self.redirect('/login')
 
         # Connect to the MySQL Database.  If this is production, to production
         # otherwise to the Dev DB

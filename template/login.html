@@ -14,22 +14,20 @@
 <div id="content" style="background-color:#ffffff;float:left;padding:10px 10px">
 
     <small>>>Login</small><br><br>
-    {{ message }}
-    
-    <form name="login" action="/login" method="post">
-        {% if user_name %}
-           Username: {{ user_name }}<input type="hidden" name="user_name", value="{{ user_name }}"><br>
-        {% else %}
-           Username:  <input type="text" name="user_name"><br>
-        {% endif %}
-        Password:  <input type="password" name=password_text"><br>
-        {% if resetpassword %}
-            Confirm Password:  <input type="password" name=confirm_password_text"><br>
-            <input type="submit" value="Reset Password"><br>
-        {% else %}
-            <input type="submit" value="Log In"><br>
-        {% endif %}
-        
+   
+    <form method="POST" action="/login">
+    <div>{{ form.username.label }}: {{ form.username(class="css_class") }}</div>
+    {% if form.username.errors %}
+        <ul class="errors">{% for error in form.username.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+    {% endif %}
+
+    <div>{{ form.password.label }}: {{ form.password() }}</div>
+    {% if form.password.errors %}
+        <ul class="errors">{% for error in form.password.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+    {% endif %}
+
+    <div>{{ form.submit() }}</div>
+
     </form>
     
 </div>

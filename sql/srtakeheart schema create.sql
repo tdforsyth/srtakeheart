@@ -18,11 +18,11 @@ create table if not exists srtakeheart.users (
   user_id int not null auto_increment,
   owner_id int not null,
   user_name varchar(255) not null,
-  pw_salt varchar(255),
   pw_hash varchar(255),
   user_email varchar(255),
-  user_first_name(255),
-  user_last_name(255)
+  user_first_name varchar(255),
+  user_last_name varchar(255),
+  user_role varchar(255)
   primary key (user_id),
   foreign key (owner_id) references srtakeheart.owners(owner_id)
 );
