@@ -14,7 +14,7 @@
         <small>>>Paient Search Results</small><br><br>
         The following patients matched your search criteria:<br><br>
         {% for patient in patients %}
-            <a href="/patientdetail?oid={{ patient.owner_id }}&pid={{ patient.patient_id }}">
+            <a href="/patientdetail?pid={{ patient.patient_id }}">
             {{ patient.first_name }} {{ patient.last_name }}</a><br>
         {% endfor %}
     </div>

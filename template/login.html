@@ -1,5 +1,20 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <title>TakeHeart:  Cardiology Device Tracking by simplyright Software</title>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /
+    <meta name="description" content="TakeHeart is software made by simplyright software that makes keeping track of data for pacemaker and other devices easy." />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        
+    <style type="text/css">
+        form  { display: table;      }
+        p     { display: table-row;  }
+        label { display: table-cell; }
+        input { display: table-cell; }
+    </style>
+</head>
 <body>
 
 <div id="container" style="font-family:'Trebuchet MS', Helvetica, sans-serif">
@@ -11,32 +26,46 @@
 <div id="menu" style="background-color:#f4f4f4;width:100px;float:left;padding:10px 10px">
 </div>
 
-<div id="content" style="background-color:#ffffff;float:left;padding:10px 10px">
+    <div id="content" style="background-color:#ffffff;float:left;padding:10px 10px">
 
-    <small>>>Login</small><br><br>
+        <small>>>Login</small><br><br>
    
-    <form method="POST" action="/login">
-    <div>{{ form.username.label }}: {{ form.username(class="css_class") }}</div>
-    {% if form.username.errors %}
-        <ul class="errors">{% for error in form.username.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-    {% endif %}
+        <form method="POST" action="/login">
+        <p>
+            {{ form.username.label }}: 
+            {{ form.username(class="css_class") }}
+        </p>
+        {% if form.username.errors %}
+            <p>    
+                <ul class="errors">
+                {% for error in form.username.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}</ul>
+            </p>
+        {% endif %}
 
-    <div>{{ form.password.label }}: {{ form.password() }}</div>
-    {% if form.password.errors %}
-        <ul class="errors">{% for error in form.password.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-    {% endif %}
+        <p>
+            {{ form.password.label }}: 
+            {{ form.password() }}
+        </p>
+        {% if form.password.errors %}
+            <p>
+                <ul class="errors">
+                {% for error in form.password.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}</ul>
+            </p>
+        {% endif %}
 
-    <div>{{ form.submit() }}</div>
+        <p>
+            {{ form.submit() }}
+        </p>
 
-    </form>
+        </form>
     
-</div>
+    </div>
 
-<div id="footer" style="background-color:#f4f4f4;color:#c1c1c1;clear:both;text-align:center;">
-&copy; 2014 simplyright | About Us | Terms of Service | Privacy Policy | Contact us | Send Feedback</div>
-
-</div>
+    {% include "footer.html" %}
  
 </body>
 </html>
-

@@ -1,6 +1,21 @@
 <!DOCTYPE html>
 {% autoescape true %}
 <html>
+<head>
+    <title>TakeHeart:  Cardiology Device Tracking by simplyright Software</title>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /
+    <meta name="description" content="TakeHeart is software made by simplyright software that makes keeping track of data for pacemaker and other devices easy." />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        
+    <style type="text/css">
+        form  { display: table;      }
+        p     { display: table-row;  }
+        label { display: table-cell; }
+        input { display: table-cell; }
+    </style>
+</head>
 <body>
 
 <div id="container" style="font-family:'Trebuchet MS', Helvetica, sans-serif">
@@ -14,59 +29,154 @@
         <small>>>Patient Details</small><br><br>
         Enter or edit patient data here:<br><br>
         
-        <form name="patientform" action="/patientdetail" method="post" enctype="multipart/form-data">
-        <table>
-            <tr>
-      	     <td>First name: </td>
-                <td><input type="text" name="firstname"
-            {% if patient %}
-                value="{{ patient.first_name }}"
-            {% endif %}
-      	        ></td>
-            {% if errfirstnametext %}
-                <td><font color="red"> {{ errfirstnametext }}
-                </font></td>
-            {% endif %}
-            </tr>
-        
-            <tr>
-                <td>Last name: </td>
-                <td><input type="text" name="lastname"
-            {% if patient %}
-                value="{{ patient.last_name }}"
-            {% endif %}
-                ></td>
-            </tr>
-          
-            <tr>
-                <td>Address: </td>
-                <td><input type="text" name="address"
-                {% if patient %}
-                  value="{{ patient.address }}"
-                {% endif %}
-                ></td>
-            </tr>
-
-            <tr>
-                <td>Phone Number: </td>
-                <td><input type="text" name="phone"
-                {% if patient %}
-                    value="{{ patient.phone_number }}"
-                {% endif %}
-                ></td>
-            </tr>
-        </table>  
-
-        {% if oid %}
-            <br>
-            <input type="hidden" name="oid" value="{{ oid }}">
-            <input type="hidden" name="pid" value="{{ pid }}">
-            <input type="submit" value="Update User">
-        {% else %}
-            <br>
-            <input type="submit" value="Create User">
+        <form method="POST" action="/patientdetail">
+        <p>
+            {{ form.firstname.label }}: 
+            {{ form.firstname(class="css_class") }}
+        </p>
+        {% if form.firstname.errors %}
+            <p>    
+                <ul class="errors">
+                {% for error in form.firstname.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}</ul>
+            </p>
         {% endif %}
-    
+
+        <p>
+            {{ form.lastname.label }}: 
+            {{ form.lastname(class="css_class") }}
+        </p>
+        {% if form.lastname.errors %}
+            <p>    
+                <ul class="errors">
+                {% for error in form.lastname.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}</ul>
+            </p>
+        {% endif %}
+
+        <p>
+            {{ form.salutation.label }}: 
+            {{ form.salutation(class="css_class") }}
+        </p>
+        {% if form.salutation.errors %}
+            <p>    
+                <ul class="errors">
+                {% for error in form.salutation.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}</ul>
+            </p>
+        {% endif %}
+        
+        <p>
+            {{ form.gender.label }}: 
+            {{ form.gender(class="css_class") }}
+        </p>
+        {% if form.gender.errors %}
+            <p>    
+                <ul class="errors">
+                {% for error in form.gender.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}</ul>
+            </p>
+        {% endif %}
+
+        <p>
+            {{ form.address.label }}: 
+            {{ form.address(class="css_class") }}
+        </p>
+        {% if form.address.errors %}
+            <p>    
+                <ul class="errors">
+                {% for error in form.address.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}</ul>
+            </p>
+        {% endif %}
+
+        <p>
+            {{ form.city.label }}: 
+            {{ form.city(class="css_class") }}
+        </p>
+        {% if form.city.errors %}
+            <p>    
+                <ul class="errors">
+                {% for error in form.city.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}</ul>
+            </p>
+        {% endif %}
+
+        <p>
+            {{ form.state.label }}: 
+            {{ form.state(class="css_class") }}
+        </p>
+        {% if form.state.errors %}
+            <p>    
+                <ul class="errors">
+                {% for error in form.state.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}</ul>
+            </p>
+        {% endif %}
+
+        <p>
+            {{ form.postcode.label }}: 
+            {{ form.postcode(class="css_class") }}
+        </p>
+        {% if form.postcode.errors %}
+            <p>    
+                <ul class="errors">
+                {% for error in form.postcode.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}</ul>
+            </p>
+        {% endif %}
+
+        <p>
+            {{ form.country.label }}: 
+            {{ form.country(class="css_class") }}
+        </p>
+        {% if form.country.errors %}
+            <p>    
+                <ul class="errors">
+                {% for error in form.country.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}</ul>
+            </p>
+        {% endif %}
+
+        <p>
+            {{ form.phone_number.label }}: 
+            {{ form.phone_number(class="css_class") }}
+        </p>
+        {% if form.phone_number.errors %}
+            <p>    
+                <ul class="errors">
+                {% for error in form.phone_number.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}</ul>
+            </p>
+        {% endif %}
+
+        <p>
+            {{ form.email.label }}: 
+            {{ form.email(class="css_class") }}
+        </p>
+        {% if form.email.errors %}
+            <p>    
+                <ul class="errors">
+                {% for error in form.email.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}</ul>
+            </p>
+        {% endif %}
+
+        <p>
+            {{ form.submit() }}
+        </p>
+
         </form>
 
         {% if files %}
@@ -86,7 +196,7 @@
            </table>
         {% endif %}
 
-        <br><a href="/fileupload?oid={{ oid }}&pid={{ pid }}">Click to upload new file for this patient</a>
+        <br><a href="/fileupload">Click to upload new file for this patient</a>
    
     </div>
    

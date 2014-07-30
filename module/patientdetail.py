@@ -8,6 +8,11 @@ import MySQLdb
 
 from webapp2_extras import sessions
 
+from wtforms import Form, TextField, SelectField, PasswordField, SubmitField, validators
+from wtforms.validators import ValidationError
+from wtforms.validators import StopValidation
+
+from dbutils import OpenCursor
 from basehandler import BaseHandler
 
 JINJA_ENVIRONMENT = jinja2.Environment(
@@ -32,19 +37,35 @@ class Patientdetail(BaseHandler):
             'session': self.session
             }
 
+        # We will use a blank Login Form (defined below) for this page
+        form = PatientForm()
+
         # Try to get the Owner and Patient IDs from the Query String
-        ownerid = self.request.get("oid")
-        patientid = self.request.get("pid")
+        ownerid = self.session.get('owner_id')
+        patientid = self.request.get('pid')
+        self.session['patient_id'] = patientid
      
         # If there IS a Patient ID, connect to the DB and
         # look up the Patient Record
         if (patientid):
 
+               # Look up the patient in the DB
                patient = Loadpatientrecord(ownerid,patientid)
 
-               template_values['oid'] = ownerid
-               template_values['pid'] = patientid
-               template_values['patient'] = patient
+               #Load the values into the form to be rendered
+               form.firstname.data = patient['first_name']
+               form.lastname.data = patient['last_name']
+               form.salutation.data = patient['salutation']
+               form.gender.data = patient['gender']
+               form.address.data = patient['patient_street_address']
+               form.city.data = patient['patient_city']
+               form.state.data = patient['patient_state']
+               form.postcode.data = patient['patient_postal_code']
+               form.country.data = patient['patient_country']
+               form.phone_number.data = patient['patient_phone_number']
+               form.email.data = patient['patient_email_address']
+
+               template_values['form'] = form
 
                # We're also going to see if this customer has any files
                # If they do, we're going to show a list of these
@@ -73,110 +94,103 @@ class Patientdetail(BaseHandler):
             'session': self.session
             }
 
-        #Check values submitted
+        # We will use a populated Login Form (defined below) for this page
+        form = PatientForm(self.request.POST)
 
-        #First set our error check variable to false; no errors have been found
-        errvalidation = False
-        errlastname = False
-        
-        if (
-            not (self.request.get('firstname')) # Nothing in the firstname box
-            ):
-            errvalidation = True
-            errfirstname = True
-            errfirstnametext = 'First Name Field cannot be blank'
-             
+        # Check the user's submitted patient data
+        if self.request.method == 'POST' and form.validate():
+            # Everything checks out - Save the data
 
-        #Something failed validation.  Reload the form with error messages
-        if (errvalidation):
-            
-            template_values.update({
-                'firstname': self.request.get('firstname'),
-                'lastname': self.request.get('lastname'),
-                'address': self.request.get('address'),
-                'phone': self.request.get('phone')
-            })
+            # Get db Connection, Cursor
+            (db,cursor) = OpenCursor()
 
-            patientid = self.request.get('pid')
-            ownerid = self.request.get('oid')
-            if (patientid):
-                template_values['pid'] = patientid
-                template_values['oid'] = ownerid
-                
+            # Get the Owner and Patient IDs from the Session (Patient ID may not exist)
+            ownerid = self.session.get('owner_id')
+            patientid = self.session.get('patient_id')
 
-            # Check to see if we found a problem with the Last Name
-            # If so, get ready to send the associated text to the form
-            if (errfirstname):
-                template_values['errfirstnametext'] = errfirstnametext
-
-            # OK, we have everything the form needs.  Reload it.
-            template = JINJA_ENVIRONMENT.get_template('patientdetail.html')
-            self.response.write(template.render(template_values))
-
-        #Everything checked out OK - Write the record to the database
-        else:
-
-            # Open the DB Connection
-            if (os.getenv('SERVER_SOFTWARE') and
-                os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
-                db = MySQLdb.connect(unix_socket='/cloudsql/your-project-id:your-instance-name', user='root', cursorclass=MySQLdb.cursors.DictCursor)
-            else:
-                db = MySQLdb.connect(host='localhost', user='root', passwd='Gl@cierHe@rt', db='srtakeheart', cursorclass=MySQLdb.cursors.DictCursor)
-
-            # Create a cursor
-            cursor = db.cursor()
-
-            patientid = self.request.get('pid')
-            ownerid = self.request.get('oid')
-
-            # If there is a patient ID, this is an existing record; create
-            # and update query
             if (patientid):
 
-                query = ''' update  patients
+                # If there is a patient ID, this is an existing record; create
+                # an update query
+
+                query= u''' update  patients'
                             set     first_name='{fname}',
                                     last_name='{lname}',
-                                    address='{addr}',
-                                    phone_number='{pnum}'
+                                    salutation='{salut}',
+                                    gender='[gender}',
+                                    patient_street_address='{addr}',
+                                    patient_city='{city}',
+                                    patient_state='[state]'
+                                    patient_postal_code='{postcode}',
+                                    patient_country='{country}',
+                                    patient_phone_number='{pnum}',
+                                    patient_email_address = '{email}'
                             where   owner_id={oid}
                             and     patient_id={pid}
-                        '''.format(fname=self.request.get('firstname'),
-                                    lname=self.request.get('lastname'),
-                                    addr=self.request.get('address'),
-                                    pnum=self.request.get('phone'),
-                                    oid=ownerid,
-                                    pid=patientid)
+                        '''.format(oid=ownerid,
+                                   pid=patientid,
+                                   fname=form.firstname.data,
+                                   lname=form.lastname.data,
+                                   salut=form.salutation.data,
+                                   gender=form.gender.data,
+                                   addr=form.address.data,
+                                   city=form.city.data,
+                                   state=form.state.data,
+                                   postcode=form.postalcode.data,
+                                   country=form.country.data,
+                                   pnum=form.phonenumber.data,
+                                   email=form.email.data)
 
-            # This is a new customer - Create a query to insert the record
+            
             else:
-
-                # Placeholder - This is a dirty hack until the code takes
-                # care of ownerid explicitly
-                ownerid = 1
+                # This is a new customer - Create a query to insert the record
                 
-                query = ''' insert into patients
-                            set     owner_id='{oid}',
-                                    first_name='{fname}',
-                                    last_name='{lname}',
-                                    address='{addr}',
-                                    phone_number='{pnum}'
-                        '''.format( oid=ownerid,
-                                    fname=self.request.get('firstname'),
-                                    lname=self.request.get('lastname'),
-                                    addr=self.request.get('address'),
-                                    pnum=self.request.get('phone'))
-
+                query = u''' insert into patients'
+                             set         owner_id={oid},
+                                         first_name='{fname}',
+                                         last_name='{lname}',
+                                         salutation='{salut}',
+                                         gender='[gender}',
+                                         patient_street_address='{addr}',
+                                         patient_city='{city}',
+                                         patient_state='[state]'
+                                         patient_postal_code='{postcode}',
+                                         patient_country='{country}',
+                                         patient_phone_number='{pnum}',
+                                         patient_email_address = '{email}'
+                        '''.format(oid=ownerid,
+                                   pid=patientid,
+                                   fname=form.firstname.data,
+                                   lname=form.lastname.data,
+                                   salut=form.salutation.data,
+                                   gender=form.gender.data,
+                                   addr=form.address.data,
+                                   city=form.city.data,
+                                   state=form.state.data,
+                                   postcode=form.postalcode.data,
+                                   country=form.country.data,
+                                   pnum=form.phonenumber.data,
+                                   email=form.email.data)
 
             # Execute the Query
             cursor.execute(query)
     
-
             # Commit the changes and close the DB Connection
             db.commit()
             db.close()
     
             # We're done saving - Go back to the overview page
             self.redirect('/')
+            
+        else:
+            # Send the user back to the form for more work
+            
+            # Initialize the Template Values                     
+            template = JINJA_ENVIRONMENT.get_template('patientdetail.html')
+            template_values['form'] = form
+
+            # Display the Template
+            self.response.write(template.render(template_values))
 
 def Loadpatientfiles(ownerid,patientid):
 
@@ -211,22 +225,21 @@ def Loadpatientfiles(ownerid,patientid):
 
 def Loadpatientrecord(ownerid,patientid):
 
-    # Connect to the MySQL Database.  If this is production, to production
-    # otherwise to the Dev DB
-    if (os.getenv('SERVER_SOFTWARE') and
-        os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
-        db = MySQLdb.connect(unix_socket='/cloudsql/your-project-id:your-instance-name', user='root', cursorclass=MySQLdb.cursors.DictCursor)
-    else:
-        db = MySQLdb.connect(host='localhost', user='root', passwd='Gl@cierHe@rt', db='srtakeheart', cursorclass=MySQLdb.cursors.DictCursor)
+    # Get db Connection, Cursor
+    (db,cursor) = OpenCursor()
 
     # Get the details for this customer
-    cursor = db.cursor()
-    query = ''' select  owner_id,
-                        patient_id,
+    query = ''' select  first_name,
                         last_name,
-                        first_name,
-                        address,
-                        phone_number
+                        salutation,
+                        gender,
+                        patient_street_address,
+                        patient_city,
+                        patient_state,
+                        patient_postal_code,
+                        patient_country,
+                        patient_phone_number,
+                        patient_email_address
                 from    patients
                 where   owner_id = {ownid}
                 and     patient_id = {patid}
@@ -239,4 +252,98 @@ def Loadpatientrecord(ownerid,patientid):
     db.close()
 
     # Return the details of the customer to whoever called
-    return patient        
+    return patient
+
+#Here we define the Forms the Patient Detail Page will use
+class PatientForm(Form):
+    firstname = TextField('First Name', [
+                        validators.Required(message=(u'Patient First Name is a required field.')),
+    ])
+    lastname = TextField('Last Name', [
+                        validators.Required(message=(u'Patient Last Name is a required field.')),
+    ])
+    salutation = SelectField('Salutation', choices=[
+                                             ('Dr.','Dr.'),
+                                             ('Mr.','Mr.'),
+                                             ('Mrs.','Mrs.'),
+                                             ('Ms.','Ms.')
+    ])
+    gender = SelectField('Gender', choices=[
+                                             ('F','Female'),
+                                             ('M','Male')
+    ])
+    address = TextField('Address', [
+                        validators.Optional(),
+    ])
+    city = TextField('City', [
+                        validators.Optional(),
+    ])
+    state = SelectField('State', choices=[
+                                             ('AL','Alabama'),
+                                             ('AK','Alaska'),
+                                             ('AZ','Arizona'),
+                                             ('AR','Arkansas'),
+                                             ('CA','California'),
+                                             ('CO','Colorado'),
+                                             ('CT','Connecticut'),
+                                             ('DE','Delaware'),
+                                             ('GA','Georgia'),
+                                             ('HI','Hawaii'),
+                                             ('ID','Idaho'),
+                                             ('IL','Illinois'),
+                                             ('IN','Indiana'),
+                                             ('IA','Iowa'),
+                                             ('KS','Kansas'),
+                                             ('KY','Kentucky'),
+                                             ('LA','Louisiana'),
+                                             ('ME','Maine'),
+                                             ('MD','Maryland'),
+                                             ('MA','Massachusetts'),
+                                             ('MI','Michigan'),
+                                             ('MN','Minnesota'),
+                                             ('MS','Mississippi'),
+                                             ('MO','Missouri'),
+                                             ('MT','Montana'),
+                                             ('NE','Nebraska'),
+                                             ('NV','Nevada'),
+                                             ('NH','New Hampshire'),
+                                             ('NJ','New Jersey'),
+                                             ('NM','New Mexico'),
+                                             ('NY','New York'),
+                                             ('NC','North Carolina'),
+                                             ('ND','North Dakota'),
+                                             ('OH','Ohio'),
+                                             ('OK','Oklahoma'),
+                                             ('OR','Oregon'),
+                                             ('PA','Pennsylvania'),
+                                             ('RI','Rhode Island'),
+                                             ('SC','South Carolina'),
+                                             ('SD','South Dakota'),
+                                             ('TN','Tennessee'),
+                                             ('TX','Texas'),
+                                             ('UT','Utah'),
+                                             ('VT','Vermont'),
+                                             ('VA','Virginia'),
+                                             ('WA','Washington'),
+                                             ('WV','West Virginia'),
+                                             ('WI','Wisconsin'),
+                                             ('WY','Wyoming')
+    ])
+    postcode = TextField('Postal Code', [
+                        validators.Length(min=5, max=10, message=u'Enter 5 Character Zip Code (99999) or 10 Character Zip+4 (99999-9999)'),
+                        validators.Regexp(u'^\d{5}(?:[-\s]\d{4})?$', flags=0, message=u'Enter 5 Character Zip Code (99999) or 10 Character Zip+4 (99999-9999)'),
+                        validators.Optional(),
+    ])
+    country = SelectField('Country', choices=[
+                                             ('USA','United States of America')
+    ])
+    phone_number = TextField('Phone Number', [
+                        validators.Length(min=7, max=25, message=u'Enter Phone Numbers in this format:  999-999-9999 or 999-9999'),
+                        validators.Regexp(u'^(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?$', flags=0, message=u'Enter Phone Numbers in this format:  999-999-9999 or 999-9999'),
+                        validators.Optional(),
+    ])
+    email = TextField('Email Address', [
+                        validators.Email(message=u'Invalid email address.'),
+                        validators.Optional(),
+    ])
+    submit    = SubmitField('Save Patient Information')

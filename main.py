@@ -23,6 +23,8 @@ from fileupload import Fileuploadhandler
 from fileupload import Filedownloadhandler
 from filedetail import Filereader
 from login import Login
+
+from dbutils import OpenCursor
 from basehandler import BaseHandler
 
 # Set up our Config Dictionary
@@ -61,6 +63,63 @@ class Overview(BaseHandler):
             'session': self.session
             }
 
+        # Let's get some information about the Application Owner
+
+        # Get db Connection, Cursor
+        (db,cursor) = OpenCursor()
+
+        # db Query to get information for this user
+        query = ''' select  owner_business_name,
+                            owner_street_address,
+                            owner_city,
+                            owner_state
+                    from    owners
+                    where   owner_id='{ownid}'
+                '''.format(ownid=self.session.get('owner_id'))
+             
+        cursor.execute(query)
+        ownerinfo = cursor.fetchone()
+
+        # Make Owner Information available to the Template
+        template_values['ownerinfo'] = ownerinfo
+
+        # db Query to get the count of patients for this owner
+        query = ''' select  count(*)
+                    from    patients
+                    where   owner_id='{ownid}'
+                '''.format(ownid=self.session.get('owner_id'))
+             
+        cursor.execute(query)
+        patientcount = cursor.fetchone()
+        template_values['patientcount'] = patientcount['count(*)']
+
+        # db Query to get the count of devices for this owner
+        query = ''' select  count(*)
+                    from    devices
+                    where   owner_id='{ownid}'
+                '''.format(ownid=self.session.get('owner_id'))
+             
+        cursor.execute(query)
+        devicecount = cursor.fetchone()
+        template_values['devicecount'] = devicecount['count(*)']
+
+        # db Query to get the count of files for this owner
+        query = ''' select  count(*)
+                    from    devices
+                    where   owner_id='{ownid}'
+                '''.format(ownid=self.session.get('owner_id'))
+             
+        cursor.execute(query)
+        filecount = cursor.fetchone()
+        template_values['filecount'] = filecount['count(*)']
+
+        # Close the DB Connection
+        db.close()
+
+        # Make Owner Information available to the Template
+        template_values['ownerinfo'] = ownerinfo
+        
+        # Set up the template and render the page
         template = JINJA_ENVIRONMENT.get_template('overview.html')
         self.response.out.write(template.render(template_values))
 
@@ -96,8 +155,8 @@ class Overview(BaseHandler):
                             patient_id,
                             last_name,
                             first_name,
-                            address,
-                            phone_number
+                            patient_street_address,
+                            patient_phone_number
                     from    patients
                     where   lower(patients.last_name) like lower('%{srch_txt}%')
                     or      lower(patients.first_name) like lower('%{srch_txt}%')

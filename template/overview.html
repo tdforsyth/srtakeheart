@@ -10,20 +10,38 @@
 
     <div id="content" style="background-color:#ffffff;float:left;padding:10px 10px">
 
-        <small>>>Overview</small><br><br>
+        <small>>>Overview</small><br>
+        {{ ownerinfo.owner_business_name }}<br>
+        {{ ownerinfo.owner_street_address}}
+        {{ ownerinfo.owner_city}},
+        {{ ownerinfo.owner_state}}<br>
+
+        <fieldset>
+        <legend><small>Data Summary</small></legend>
+            <table>
+                <tr><td>Patients:</td><td>{{ patientcount }}</td></tr>
+                <tr><td>Devices:</td><td>{{ devicecount }}</td></tr>
+                <tr><td>Files:</td><td>{{ filecount }}</td><//tr>
+            </table>
+        </fieldset>
+    
+        <fieldset>
+        <legend><small>Patient Search</small></legend>
         Enter patient full or partial first or last name<br>
         to search for existing patient<br>
-    
         <form name="search" action="/" method="post">
             <input type="text" name="searchtext"><br>
             <input type="submit" value="Search for Existing Patient"><br>
         </form>
+        </fieldset>
 
-        <br>
-        Create a new patient record<br>
+        <fieldset>
+        <legend><small>Create New Patient Record</small></legend>
         <form name="create" action="/patientdetail" method="get">
             <input type="submit" value="Create New Patient"><br>
         </form>
+        </fieldset>
+
     
     </div>
 
